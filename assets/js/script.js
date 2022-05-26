@@ -1,23 +1,29 @@
 var questionData = [];
 var users = [];
-var questionE1 = document.querySelector("#question");
+var questionEl = document.querySelector("#question");
 var currentAnswer = 0;
 var scoreEl = document.querySelector(".score");
 var footerEI = document.querySelector('footer');
-var finalScore = document.querySelector("#final-score");
-var welBtn = document.querySelector(".start-quiz");
+var finalScoreEl = document.querySelector("#final-score");
+// var welBtn = document.querySelector(".start-quiz");
+var btnListner = document.querySelector(".btn");
+var btnBackClear = document.querySelector(".btn-score");
 var viewHighScore = document.querySelector("#score-time");
-var highScoreEI =  document.querySelector(".high-score");
+var highScoreEl = document.querySelector(".high-score");
+var welcomePageEl = document.querySelector(".welcome-page");
+// var submitEl = document.querySelectorAll("button");
 var score = 0;
 var totalRecords = 0;
 var sec = 0;
 
 
 var init = function () {
-    hideAll();
-    document.querySelector(".welcome-page").style.display = "flex";
-    // finalScore.style.display = "none";
-    // highScoreEI.style.display = "none";
+    debugger;
+    score = totalRecords = currentAnswer=0;
+    if(questionData.length <=0){
+        getDataLocalStorage("questions");
+    }  
+    showHide([welcomePageEl]);
 };
 
 // Getting Data from Local storage
@@ -33,7 +39,7 @@ var getDataLocalStorage = function (key) {
 
 // Question Creation
 var createQuestion = function (questionObject) {
-    questionE1.innerHTML = "";
+    questionEl.innerHTML = "";
     footerEI.innerHTML = "";
 
     var questionHeadingE1 = document.createElement("h2");
@@ -52,25 +58,35 @@ var createQuestion = function (questionObject) {
     }
 
     currentAnswer = parseInt(questionObject["answer"]);
-    questionE1.appendChild(questionHeadingE1);
-    questionE1.appendChild(questionListE1);
+    questionEl.appendChild(questionHeadingE1);
+    questionEl.appendChild(questionListE1);
 };
 
 // Selected option by the user /  
 var btnClick = function (event) {
-    var eventType = event.type;
 
-    if (eventType !== "submit") {
+    var eventText = event.target.textContent.trim().toLowerCase() ;
+
+    if(eventText === "start quiz"){
+        welcomePage();
+    }else if(eventText === "go back"){
+        showHide([welcomePageEl]);
+    }else if(eventText === "clear high score"){
+        users =[];
+        localStorage.removeItem("users");
+        setDataLocalStorage("users", users);
+        highScore();
+    }else if (eventText !== "submit") {
 
         selectedAnswer = event.target;
         if (selectedAnswer.parentElement.getAttribute('disabled') === 'disabled') {
             return false;
-        } else {
-
+        } else {            
             // disabling the click event /  
             selectedAnswer.parentElement.setAttribute('disabled', 'disabled');
             event.target.style.backgroundColor = "blue";
             isRight(event.target.getAttribute(['data-item-id']));
+            //footerEI.innerHTML ="";
         }
     } else {
 
@@ -88,7 +104,7 @@ var btnClick = function (event) {
             userIntial.value = "";
             score = 0;
         }
-        finalScore.style.display="none"
+        init();
     }
 };
 
@@ -108,21 +124,24 @@ var isRight = function (dataID) {
             sec -= 10;
         }
 
-        footerEI.innerHTML = " <h3>  " + message + "</h3>";
+        footerEI.innerHTML = "<h3>" + message + "</h3>";
         totalRecords += 1;
 
         // Pause for the next question to come in 
-        setTimeout(() => { totalQuestion() }, 1000);
+        setTimeout(() => { totalQuestion() }, 1000);        
     } else
         return false;
 };
 
 // Total number of questions to be presented
 var totalQuestion = function () {
-    getDataLocalStorage("questions");
+    // if(questionData.length < -1){
+    //     getDataLocalStorage("questions");
+    // }
 
     if (questionData[totalRecords] !== null) {
         if (totalRecords === questionData.length) {
+            footerEI.innerHTML = "";
             userFinalScore();
         } else {
             createQuestion(questionData[totalRecords]);
@@ -130,27 +149,30 @@ var totalQuestion = function () {
     }
 };
 
+//user Score
 var userFinalScore = function () {
-    questionE1.style.display = "none";
-    footerEI.style.display = "none";
-    finalScore.style.display = "flex";
+    showHide([finalScoreEl]);
+    //questionEl.style.display = "none";
+    //footerEI.style.display = "none";
+    //finalScoreEl.style.display = "flex";
 
-    finalScore.innerHTML = "<h2>All Done</h2>";
+    finalScoreEl.innerHTML = "<h2>All Done</h2>";
     var finalSc = document.createElement("p");
     finalSc.innerText = `Your final Score is ${score}`;
-    finalScore.appendChild(finalSc);
+    finalScoreEl.appendChild(finalSc);
 
     var userInitials = document.createElement("div");
     userInitials.className = "player-info";
     userInitials.innerHTML = "<label>Enter Initial</label>";
     userInitials.innerHTML += "<input type='text' name='name' id='name'>";
-    userInitials.innerHTML += "<button class='btn on-submit' onclick='btnClick(this)'>Submit</button>";
+    userInitials.innerHTML += "<button class='btn on-submit' onclick='btnClick(event)'>Submit</button>";
 
-    finalScore.appendChild(userInitials);
+    finalScoreEl.appendChild(userInitials);
 }
 
 // Timer Function
 var updateTimer = function () {
+    debugger;
     sec--;
     if (sec <= -1 || totalRecords === questionData.length) {
         document.querySelector('.time').innerHTML = "0" + "sec left";
@@ -163,53 +185,76 @@ var updateTimer = function () {
 };
 
 // Welcome Page
-var welcomePage = function (event) {
-    event.target.parentElement.style.display = "none"
+var welcomePage = function () {
+    showHide([questionEl]);
     totalQuestion();
 };
 
-var highScore = function () {
-    hideAll();
-    debugger;
+//View High Score
+var highScore = function (event) {
+    //event.target.removeEventListener("click", highScore);
+    showHide([highScoreEl]);
     getDataLocalStorage("users");
-    sortByScore();
 
     var userTable = document.querySelector("#score-table");
-    userTable.parentElement.style.display="flex";
-    var Rank = 1 ;
-    users.forEach(user => { 
+    document.querySelector("#score-table").innerHTML="";
+    if (sortByScore()) {
+        var Rank = 1;
+        users.forEach(user => {
+            var createInput = document.createElement("INPUT");
+            createInput.setAttribute("disabled", "disabled");
+            var cretendials = Rank++ +"." + `${user.name}` + " " + `${user.score}`;
+            createInput.setAttribute("placeholder", cretendials );
+            userTable.appendChild(createInput);        
+        });
+    }else{
         var createInput = document.createElement("input");
-        createInput.setAttribute("disabled","disabled");
-        createInput.setAttribute("placeholder", Rank++ + ". " + `${user.name}` + " " + `${user.score}`);
+        createInput.setAttribute("disabled", "disabled");
+        createInput.setAttribute("placeholder","No data to show!!");
         userTable.appendChild(createInput);
-    });
+    }   
 }
 
-var sortByScore = function(){
+//Sorting the user by highest score
+var sortByScore = function () {
     var temp;
+    if (users !== null && users.length > 0) {
+        for (var i = 0; i < users.length; i++) {
+            for (j = i + 1; j < users.length; j++) {
 
-    for (var i = 0; i < users.length; i++) {
-        for (j = i + 1; j < users.length; j++) {
-            
-            if(users[i].score < users[j].score){
-                temp = users[j];
-                users[j] = users[i];
-                users[i] = temp;
+                if (users[i].score < users[j].score) {
+                    temp = users[j];
+                    users[j] = users[i];
+                    users[i] = temp;
+                }
             }
         }
+        return true;
+    } else {
+        return false;
     }
 };
 
-var hideAll = function(){
-    document.querySelector(".welcome-page").style.display = "none";
-    document.querySelector(".final-score").style.display = "none";
-    document.querySelector(".high-score").style.display = "none";
+var showHide = function (show) {
+
+    var hideAll = [welcomePageEl, finalScoreEl, highScoreEl, questionEl];
+
+    //hide all the elements
+    hideAll.forEach(element => {
+        element.style.display = "none";
+    });
+
+    if (show !== null || show !== "") {
+        //show all
+        show.forEach(element => {
+            element.style.display = "flex";
+        });
+    }
 }
 
 init();
-welBtn.addEventListener("click",welcomePage);
-questionE1.addEventListener("click", btnClick);
-debugger;
-viewHighScore.addEventListener("click",highScore);
-
-// var timeCheck = setInterval(updateTimer, 1000);
+btnListner.addEventListener("click",btnClick);
+questionEl.addEventListener("click", btnClick);
+btnBackClear.addEventListener("click", btnClick);
+viewHighScore.addEventListener("click", highScore);
+var timeCheck = setInterval(updateTimer, 1000);
