@@ -5,24 +5,22 @@ var currentAnswer = 0;
 var scoreEl = document.querySelector(".score");
 var footerEI = document.querySelector('footer');
 var finalScoreEl = document.querySelector("#final-score");
-// var welBtn = document.querySelector(".start-quiz");
 var btnListner = document.querySelector(".btn");
 var btnBackClear = document.querySelector(".btn-score");
 var viewHighScore = document.querySelector("#score-time");
 var highScoreEl = document.querySelector(".high-score");
 var welcomePageEl = document.querySelector(".welcome-page");
-// var submitEl = document.querySelectorAll("button");
 var score = 0;
 var totalRecords = 0;
 var sec = 0;
+var timeCheck;
 
 
 var init = function () {
-    debugger;
     score = totalRecords = currentAnswer=0;
     if(questionData.length <=0){
         getDataLocalStorage("questions");
-    }  
+    }
     showHide([welcomePageEl]);
 };
 
@@ -81,15 +79,16 @@ var btnClick = function (event) {
         selectedAnswer = event.target;
         if (selectedAnswer.parentElement.getAttribute('disabled') === 'disabled') {
             return false;
-        } else {            
-            // disabling the click event /  
+        } else { 
+                 
+            // disabling the click event / 
+            if(event.target.getAttribute(['data-item-id']) !=null){
             selectedAnswer.parentElement.setAttribute('disabled', 'disabled');
-            event.target.style.backgroundColor = "blue";
+            event.target.style.backgroundColor  = "blue";
             isRight(event.target.getAttribute(['data-item-id']));
-            //footerEI.innerHTML ="";
+            }
         }
     } else {
-
         var userIntial = document.querySelector('input[name="name"]');
         if (userIntial.value === '' || userIntial.value === null) {
             alert("Input your Initals");
@@ -97,7 +96,7 @@ var btnClick = function (event) {
         } else {
             var user = {
                 name: userIntial.value,
-                score: score
+                score: score < 0 ? 0 : score 
             }
             users.push(user);
             setDataLocalStorage("users", users);
@@ -120,7 +119,7 @@ var isRight = function (dataID) {
             score += 10;
         } else {
             message = "Wrong Answer!";
-            score -= 10;
+            // score -= 10;
             sec -= 10;
         }
 
@@ -128,16 +127,13 @@ var isRight = function (dataID) {
         totalRecords += 1;
 
         // Pause for the next question to come in 
-        setTimeout(() => { totalQuestion() }, 1000);        
+        setTimeout(() => { totalQuestion() }, 500);        
     } else
         return false;
 };
 
 // Total number of questions to be presented
 var totalQuestion = function () {
-    // if(questionData.length < -1){
-    //     getDataLocalStorage("questions");
-    // }
 
     if (questionData[totalRecords] !== null) {
         if (totalRecords === questionData.length) {
@@ -150,15 +146,11 @@ var totalQuestion = function () {
 };
 
 //user Score
-var userFinalScore = function () {
+var userFinalScore = function () {debugger;
     showHide([finalScoreEl]);
-    //questionEl.style.display = "none";
-    //footerEI.style.display = "none";
-    //finalScoreEl.style.display = "flex";
-
     finalScoreEl.innerHTML = "<h2>All Done</h2>";
     var finalSc = document.createElement("p");
-    finalSc.innerText = `Your final Score is ${score}`;
+    finalSc.innerText = `Your final Score is ${score = score < 0 ? 0 :score}`;
     finalScoreEl.appendChild(finalSc);
 
     var userInitials = document.createElement("div");
@@ -172,20 +164,28 @@ var userFinalScore = function () {
 
 // Timer Function
 var updateTimer = function () {
-    debugger;
-    sec--;
-    if (sec <= -1 || totalRecords === questionData.length) {
+    if (sec <= 0 || totalRecords === questionData.length) {
+       
+        var message = sec <= 0 ? "Time Up" : "End of Questions. You have attempted all the questions";
         document.querySelector('.time').innerHTML = "0" + "sec left";
         clearInterval(timeCheck);
-        setTimeout(() => { alert("Time out!! :("); }, 100);
+        footerEI.innerHTML = "";
+        window.alert(message);
         userFinalScore();
     } else {
+        sec--;
+        if(sec<=10){ debugger;
+            document.querySelector('.time').style.color='red';
+        }
         document.querySelector('.time').innerHTML = sec + "sec left";
     }
 };
 
 // Welcome Page
 var welcomePage = function () {
+    totalRecords = 0;
+    sec = questionData.length * 10 ;
+    timeCheck = setInterval(updateTimer, 1000);
     showHide([questionEl]);
     totalQuestion();
 };
@@ -252,9 +252,18 @@ var showHide = function (show) {
     }
 }
 
+var setDataLocalStorage = function (key,value) {
+    if( (key === null || key === '') && (value.lenght < 0)){
+        window.alert("Input the right key and dataset for DB");
+    }else {
+        window.localStorage.setItem(key, JSON.stringify(value));
+    }
+}
+
+setDataLocalStorage("questions",questions);
+
 init();
 btnListner.addEventListener("click",btnClick);
 questionEl.addEventListener("click", btnClick);
 btnBackClear.addEventListener("click", btnClick);
 viewHighScore.addEventListener("click", highScore);
-var timeCheck = setInterval(updateTimer, 1000);
