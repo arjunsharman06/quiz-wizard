@@ -17,8 +17,8 @@ var timeCheck;
 
 
 var init = function () {
-    score = totalRecords = currentAnswer=0;
-    if(questionData.length <=0){
+    score = totalRecords = currentAnswer = 0;
+    if (questionData.length <= 0) {
         getDataLocalStorage("questions");
     }
     showHide([welcomePageEl]);
@@ -63,45 +63,52 @@ var createQuestion = function (questionObject) {
 // Selected option by the user /  
 var btnClick = function (event) {
 
-    var eventText = event.target.textContent.trim().toLowerCase() ;
+    var eventText = event.target.textContent.trim().toLowerCase();
 
-    if(eventText === "start quiz"){
+    if (eventText === "start quiz") {
         welcomePage();
-    }else if(eventText === "go back"){
+    } else if (eventText === "go back") {
         showHide([welcomePageEl]);
-    }else if(eventText === "clear high score"){
-        users =[];
+    } else if (eventText === "clear high score") {
+        users = [];
         localStorage.removeItem("users");
         setDataLocalStorage("users", users);
         highScore();
-    }else if (eventText !== "submit") {
+    } else if (eventText !== "submit") {
 
         selectedAnswer = event.target;
         if (selectedAnswer.parentElement.getAttribute('disabled') === 'disabled') {
             return false;
-        } else { 
-                 
-            // disabling the click event / 
-            if(event.target.getAttribute(['data-item-id']) !=null){
-            selectedAnswer.parentElement.setAttribute('disabled', 'disabled');
-            event.target.style.backgroundColor  = "blue";
-            isRight(event.target.getAttribute(['data-item-id']));
+        } else {
+
+            // disabling the click event
+            if (event.target.getAttribute(['data-item-id']) != null) {
+                selectedAnswer.parentElement.setAttribute('disabled', 'disabled');
+                event.target.style.backgroundColor = "blue";
+                isRight(event.target.getAttribute(['data-item-id']));
             }
         }
     } else {
         var userIntial = document.querySelector('input[name="name"]');
+        let reg = new RegExp('^[a-zA-Z]{2}$');
+
         if (userIntial.value === '' || userIntial.value === null) {
             alert("Input your Initals");
             return false;
         } else {
-            var user = {
-                name: userIntial.value,
-                score: score < 0 ? 0 : score 
+            if(reg.test(userIntial.value)){
+                var user = {
+                    name: userIntial.value,
+                    score: score < 0 ? 0 : score
+                }
+                users.push(user);
+                setDataLocalStorage("users", users);
+                userIntial.value = "";
+                score = 0;
+            }else{
+                alert("The length of the name should be 2 characters only & only letter are accepted . Try again!!");
+                return false;                
             }
-            users.push(user);
-            setDataLocalStorage("users", users);
-            userIntial.value = "";
-            score = 0;
         }
         init();
     }
@@ -119,7 +126,6 @@ var isRight = function (dataID) {
             score += 10;
         } else {
             message = "Wrong Answer!";
-            // score -= 10;
             sec -= 10;
         }
 
@@ -127,7 +133,7 @@ var isRight = function (dataID) {
         totalRecords += 1;
 
         // Pause for the next question to come in 
-        setTimeout(() => { totalQuestion() }, 500);        
+        setTimeout(() => { totalQuestion() }, 500);
     } else
         return false;
 };
@@ -146,11 +152,11 @@ var totalQuestion = function () {
 };
 
 //user Score
-var userFinalScore = function () {debugger;
+var userFinalScore = function () {
     showHide([finalScoreEl]);
     finalScoreEl.innerHTML = "<h2>All Done</h2>";
     var finalSc = document.createElement("p");
-    finalSc.innerText = `Your final Score is ${score = score < 0 ? 0 :score}`;
+    finalSc.innerText = `Your final Score is ${score = score < 0 ? 0 : score}`;
     finalScoreEl.appendChild(finalSc);
 
     var userInitials = document.createElement("div");
@@ -165,7 +171,7 @@ var userFinalScore = function () {debugger;
 // Timer Function
 var updateTimer = function () {
     if (sec <= 0 || totalRecords === questionData.length) {
-       
+
         var message = sec <= 0 ? "Time Up" : "End of Questions. You have attempted all the questions";
         document.querySelector('.time').innerHTML = "0" + "sec left";
         clearInterval(timeCheck);
@@ -174,8 +180,9 @@ var updateTimer = function () {
         userFinalScore();
     } else {
         sec--;
-        if(sec<=10){ debugger;
-            document.querySelector('.time').style.color='red';
+        if (sec <= 10) {
+            debugger;
+            document.querySelector('.time').style.color = 'red';
         }
         document.querySelector('.time').innerHTML = sec + "sec left";
     }
@@ -184,7 +191,7 @@ var updateTimer = function () {
 // Welcome Page
 var welcomePage = function () {
     totalRecords = 0;
-    sec = questionData.length * 10 ;
+    sec = questionData.length * 10;
     timeCheck = setInterval(updateTimer, 1000);
     showHide([questionEl]);
     totalQuestion();
@@ -192,27 +199,26 @@ var welcomePage = function () {
 
 //View High Score
 var highScore = function (event) {
-    //event.target.removeEventListener("click", highScore);
     showHide([highScoreEl]);
     getDataLocalStorage("users");
 
     var userTable = document.querySelector("#score-table");
-    document.querySelector("#score-table").innerHTML="";
+    document.querySelector("#score-table").innerHTML = "";
     if (sortByScore()) {
         var Rank = 1;
         users.forEach(user => {
             var createInput = document.createElement("INPUT");
             createInput.setAttribute("disabled", "disabled");
-            var cretendials = Rank++ +"." + `${user.name}` + " " + `${user.score}`;
-            createInput.setAttribute("placeholder", cretendials );
-            userTable.appendChild(createInput);        
+            var cretendials = Rank++ + "." + `${user.name}` + " " + `${user.score}`;
+            createInput.setAttribute("placeholder", cretendials);
+            userTable.appendChild(createInput);
         });
-    }else{
+    } else {
         var createInput = document.createElement("input");
         createInput.setAttribute("disabled", "disabled");
-        createInput.setAttribute("placeholder","No data to show!!");
+        createInput.setAttribute("placeholder", "No data to show!!");
         userTable.appendChild(createInput);
-    }   
+    }
 }
 
 //Sorting the user by highest score
@@ -235,6 +241,7 @@ var sortByScore = function () {
     }
 };
 
+//Add & remove Sections
 var showHide = function (show) {
 
     var hideAll = [welcomePageEl, finalScoreEl, highScoreEl, questionEl];
@@ -252,18 +259,19 @@ var showHide = function (show) {
     }
 }
 
-var setDataLocalStorage = function (key,value) {
-    if( (key === null || key === '') && (value.lenght < 0)){
+//Setting data to Local Storage
+var setDataLocalStorage = function (key, value) {
+    if ((key === null || key === '') && (value.lenght < 0)) {
         window.alert("Input the right key and dataset for DB");
-    }else {
+    } else {
         window.localStorage.setItem(key, JSON.stringify(value));
     }
 }
 
-setDataLocalStorage("questions",questions);
+setDataLocalStorage("questions", questions);
 
 init();
-btnListner.addEventListener("click",btnClick);
+btnListner.addEventListener("click", btnClick);
 questionEl.addEventListener("click", btnClick);
 btnBackClear.addEventListener("click", btnClick);
 viewHighScore.addEventListener("click", highScore);
