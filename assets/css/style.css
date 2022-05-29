@@ -156,12 +156,12 @@ header {
 
     .question{
         width: 100%;
-        font-size: 8px;
+        font-size: 0.8rem;
         margin: 10px auto;
     }
 
     .question-list-item{
-        font-size: 10px;
+        font-size: 0.8rem;
         flex: 1 0 auto;
     }
 

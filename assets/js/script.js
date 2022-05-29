@@ -66,6 +66,7 @@ var btnClick = function (event) {
     var eventText = event.target.textContent.trim().toLowerCase();
 
     if (eventText === "start quiz") {
+        viewHighScore.removeEventListener("click", highScore, false);
         welcomePage();
     } else if (eventText === "go back") {
         showHide([welcomePageEl]);
@@ -96,7 +97,7 @@ var btnClick = function (event) {
             alert("Input your Initals");
             return false;
         } else {
-            if(reg.test(userIntial.value)){
+            if (reg.test(userIntial.value)) {
                 var user = {
                     name: userIntial.value,
                     score: score < 0 ? 0 : score
@@ -105,9 +106,9 @@ var btnClick = function (event) {
                 setDataLocalStorage("users", users);
                 userIntial.value = "";
                 score = 0;
-            }else{
+            } else {
                 alert("The length of the name should be 2 characters only & only letter are accepted . Try again!!");
-                return false;                
+                return false;
             }
         }
         init();
@@ -144,6 +145,7 @@ var totalQuestion = function () {
     if (questionData[totalRecords] !== null) {
         if (totalRecords === questionData.length) {
             footerEI.innerHTML = "";
+            viewHighScore.addEventListener("click", highScore, false);
             userFinalScore();
         } else {
             createQuestion(questionData[totalRecords]);
@@ -181,7 +183,6 @@ var updateTimer = function () {
     } else {
         sec--;
         if (sec <= 10) {
-            debugger;
             document.querySelector('.time').style.color = 'red';
         }
         document.querySelector('.time').innerHTML = sec + "sec left";
