@@ -39,7 +39,15 @@ const questions = [
         options: ["True","False"],
         answer: "2"
     },
-
-
+    {
+        heading: "Which of the following keywords is used to define a variable in Javascript?",
+        options: ["var","let","Both the above options","None of the above"],
+        answer: "3"
+    },
+    {
+        heading: "Upon encountering empty statements, what does the Javascript Interpreter do",
+        options: ["Throws an error","Ignores the statement","Gives a warning","None of the above"],
+        answer: "2"
+    },
 ];
 

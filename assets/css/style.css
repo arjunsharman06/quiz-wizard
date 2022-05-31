@@ -62,7 +62,7 @@ header {
 
 /* High Score Table */
 .high-score{
-    display: flex;
+    display: none;
     flex-wrap: wrap;
     max-width: 50%;
     margin: auto;
