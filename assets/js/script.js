@@ -21,6 +21,10 @@ var init = function () {
     if (questionData.length <= 0) {
         getDataLocalStorage("questions");
     }
+    var timeColor = document.querySelector('.time').style.color;
+    if(timeColor === "red"){
+        document.querySelector('.time').style.color ="";
+    }
     showHide([welcomePageEl]);
 };
 
@@ -184,6 +188,8 @@ var updateTimer = function () {
         sec--;
         if (sec <= 10) {
             document.querySelector('.time').style.color = 'red';
+        }else{
+            document.querySelector('.time').style.color = '';
         }
         document.querySelector('.time').innerHTML = sec + "sec left";
     }
@@ -193,7 +199,7 @@ var updateTimer = function () {
 var welcomePage = function () {
     totalRecords = 0;
     sec = questionData.length * 10;
-    timeCheck = setInterval(updateTimer, 1000);
+    timeCheck = setInterval(updateTimer, 1000);    
     showHide([questionEl]);
     totalQuestion();
 };
