@@ -7,7 +7,7 @@ var footerEI = document.querySelector('footer');
 var finalScoreEl = document.querySelector("#final-score");
 var btnListner = document.querySelector(".btn");
 var btnBackClear = document.querySelector(".btn-score");
-var viewHighScore = document.querySelector("#score-time");
+var viewHighScore = document.querySelector("#score-time .score");
 var highScoreEl = document.querySelector(".high-score");
 var welcomePageEl = document.querySelector(".welcome-page");
 var score = 0;
@@ -106,6 +106,9 @@ var btnClick = function (event) {
                     name: userIntial.value,
                     score: score < 0 ? 0 : score
                 }
+            if(users === null){
+                users=[];
+            }
                 users.push(user);
                 setDataLocalStorage("users", users);
                 userIntial.value = "";
